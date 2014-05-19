@@ -1,3 +1,4 @@
+package general;
 
 public class Deadlock {
     static class Friend {

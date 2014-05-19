@@ -1,3 +1,4 @@
+package general;
 
 public class ThreadJoin implements Runnable {
 	public void run() {

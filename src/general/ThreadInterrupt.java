@@ -1,3 +1,4 @@
+package general;
 
 public class ThreadInterrupt implements Runnable {
 	public void run() {

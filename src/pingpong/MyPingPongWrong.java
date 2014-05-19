@@ -1,5 +1,6 @@
+package pingpong;
 
-public class MyPingPong {
+public class MyPingPongWrong {
 	
 	public static void main(String[] args) {
 		
