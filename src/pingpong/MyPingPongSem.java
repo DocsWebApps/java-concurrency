@@ -17,9 +17,10 @@ public class MyPingPongSem {
 					try {
 						pongSema.acquire();
 						System.out.println("Pong ("+i+")");
-						pingSema.release();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
+					}finally {
+						pingSema.release();
 					}
 				}
 			}
@@ -31,9 +32,10 @@ public class MyPingPongSem {
 					try {
 						pingSema.acquire();
 						System.out.println("Ping ("+i+")");
-						pongSema.release();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
+					} finally {
+						pongSema.release();
 					}
 				}
 			}

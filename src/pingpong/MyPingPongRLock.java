@@ -16,13 +16,17 @@ public class MyPingPongRLock {
 			public void play(String action, int seqNum) 
 			throws InterruptedException {
 				lock.lock();
-				while (nextAction==action) {
-					condition.await();
+				try {
+					while (nextAction==action) {
+						condition.await();
+					}
+					System.out.println(action+"("+seqNum+")");
+					nextAction=action;
+					condition.signal();
+				} catch(Exception e) {}
+				finally {
+					lock.unlock();
 				}
-				System.out.println(action+"("+seqNum+")");
-				nextAction=action;
-				condition.signal();
-				lock.unlock();
 			}
 		}
 		
@@ -33,9 +37,7 @@ public class MyPingPongRLock {
 				for(int i=1;i<20;i++) {
 					try {
 						mPlayAction.play("ping", i);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					} catch (InterruptedException e) {}
 				}
 			}
 		});
@@ -45,9 +47,7 @@ public class MyPingPongRLock {
 				for(int i=1;i<20;i++) {
 					try {
 						mPlayAction.play("pong", i);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					} catch (InterruptedException e) {}
 				}
 			}
 		});
@@ -59,7 +59,5 @@ public class MyPingPongRLock {
 		ping.join();
 		
 		System.out.println("That's all folks!!");
-
 	}
-
 }
