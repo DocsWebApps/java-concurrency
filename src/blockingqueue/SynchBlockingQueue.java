@@ -13,16 +13,17 @@ import java.util.concurrent.TimeUnit;
  *        doesn't implement any synchronization mechanisms, so of
  *        course it will fail horribly, which is the intent!
  */
-public class BuggyBlockingQueue<E> implements BlockingQueue<E> {
+public class SynchBlockingQueue<E> implements BlockingQueue<E> {
 	
 	public static void main (String[] args) {
-		final BuggyBlockingQueue<String> buggyQueue=new BuggyBlockingQueue<String>(10);
+		final SynchBlockingQueue<String> buggyQueue=new SynchBlockingQueue<String>(100);
 		
 		Thread put=new Thread(new Runnable() {
 			public void run() {
 				for(int i=0; i<1000;i++) {
 					try {
 						buggyQueue.put("hello");
+						System.out.println("put"+buggyQueue.size());
 					} catch (InterruptedException e) {}
 				}
 			}
@@ -30,9 +31,10 @@ public class BuggyBlockingQueue<E> implements BlockingQueue<E> {
 
 		Thread take=new Thread(new Runnable() {
 			public void run() {
-				for(int i=0; i<1001;i++) {
+				for(int i=0; i<1000;i++) {
 					try {
 						buggyQueue.take();
+						System.out.println("take"+buggyQueue.size());
 					} catch (InterruptedException e) {}
 				}
 			}
@@ -41,6 +43,7 @@ public class BuggyBlockingQueue<E> implements BlockingQueue<E> {
 		
 		put.start();
 		take.start();
+		
 		try {
 			put.join();
 			take.join();
@@ -54,11 +57,14 @@ public class BuggyBlockingQueue<E> implements BlockingQueue<E> {
      * work correctly when called from multiple Java Threads.
      */
     private ArrayList<E> mList = null;
+    private int queueLength=0;
+    private int queueSize=0;
 
     /**
      * Constructor just creates an ArrayList of the appropriate size.
      */
-    public BuggyBlockingQueue(int initialSize) {
+    public SynchBlockingQueue(int initialSize) {
+    	queueSize=initialSize;
         mList = new ArrayList<E>(initialSize);
     }
 
@@ -66,15 +72,25 @@ public class BuggyBlockingQueue<E> implements BlockingQueue<E> {
      * Insert msg at the tail of the queue, but doesn't block if the
      * queue is full.
      */
-    public void put(E msg) throws InterruptedException {
+    public synchronized void put(E msg) throws InterruptedException {
+    	if(queueLength==queueSize) {
+    		wait();
+    	}
         mList.add(msg);
+        queueLength++;
+        notify();
     }
 
     /**
      * Remove msg from the head of the queue, but doesn't block if the
      * queue is empty.
      */
-    public E take() throws InterruptedException {
+    public synchronized E take() throws InterruptedException {
+    	if(queueLength==0) {
+    		wait();
+    	}
+    	queueLength--;
+    	notify();
         return mList.remove(0);
     }
 
@@ -155,6 +171,6 @@ public class BuggyBlockingQueue<E> implements BlockingQueue<E> {
         return false;
     }
     public int size() {
-        return 0;
+        return queueLength;
     }
 }
