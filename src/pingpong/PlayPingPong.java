@@ -109,11 +109,13 @@ public class PlayPingPong {
 				try {
 					condition.await();
 				} catch (InterruptedException e) {}
-			}	
+			}
+			mLock.unlock();
 		}
 
 		@Override
 		void release() {
+			mLock.lock();
 			mTurnOwner=mOtherThread;
 			condition.signal();
 			mLock.unlock();
